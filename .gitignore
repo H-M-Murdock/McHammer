@@ -1,0 +1,130 @@
+# ============================================================
+# McHammer – .gitignore
+# C# (.NET) + Angular | Rider + VS Code
+# ============================================================
+
+# ------------------------------------------------------------
+# BETRIEBSSYSTEM
+# ------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ------------------------------------------------------------
+# RIDER (JetBrains)
+# ------------------------------------------------------------
+.idea/
+*.sln.iml
+
+# ------------------------------------------------------------
+# VISUAL STUDIO CODE
+# ------------------------------------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ------------------------------------------------------------
+# C# / .NET  (Api, Dev, Lib)
+# ------------------------------------------------------------
+
+## Build-Ausgaben
+bin/
+obj/
+out/
+publish/
+
+.npmrc
+
+## Visual Studio temporäre Dateien
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+## NuGet
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+packages/
+!**/packages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Laufzeitkonfiguration & Secrets
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+*.pfx
+*.p12
+
+## Testabdeckung & Ergebnisse
+TestResults/
+coverage/
+*.coveragexml
+*.trx
+
+## Lokale Umgebungsdateien
+.env
+.env.*
+!.env.example
+
+## Entity Framework Migrationen (optional – auskommentieren, falls Migrationen committed werden sollen)
+# **/Migrations/
+
+# ------------------------------------------------------------
+# ANGULAR  (Ui)
+# ------------------------------------------------------------
+
+## Abhängigkeiten
+node_modules/
+
+## Build-Ausgaben
+dist/
+tmp/
+out-tsc/
+bazel-out/
+
+## Angular-spezifisch
+.angular/
+.sass-cache/
+connect.lock
+libpeerconnection.log
+testem.log
+typings/
+
+## Karma / Jest Testergebnisse
+/coverage
+
+## Umgebungsdateien
+src/environments/environment.local.ts
+
+## npm / yarn / pnpm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+package-lock.json   # entfernen, falls du Lock-Files committen möchtest
+yarn.lock           # entfernen, falls du Lock-Files committen möchtest
+
+# ------------------------------------------------------------
+# LOGS & TEMPORÄRE DATEIEN
+# ------------------------------------------------------------
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.orig
+
+# ------------------------------------------------------------
+# DOCKER (falls später genutzt)
+# ------------------------------------------------------------
+.dockerignore
+docker-compose.override.yml

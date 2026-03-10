@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McHammer.Lib", "McHammer.Lib\McHammer.Lib.csproj", "{5DF8C1F4-EFEC-46E3-821B-97C100C61338}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McHammer.Api", "McHammer.Api\McHammer.Api.csproj", "{FF3F14C5-AC0E-49BA-B052-B620A1D9CFDF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McHammer.Dev", "McHammer.Dev\McHammer.Dev.csproj", "{170DB0F8-C1CB-47AA-8B86-5EFEF6CCE871}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5DF8C1F4-EFEC-46E3-821B-97C100C61338}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DF8C1F4-EFEC-46E3-821B-97C100C61338}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DF8C1F4-EFEC-46E3-821B-97C100C61338}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DF8C1F4-EFEC-46E3-821B-97C100C61338}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF3F14C5-AC0E-49BA-B052-B620A1D9CFDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF3F14C5-AC0E-49BA-B052-B620A1D9CFDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF3F14C5-AC0E-49BA-B052-B620A1D9CFDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF3F14C5-AC0E-49BA-B052-B620A1D9CFDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{170DB0F8-C1CB-47AA-8B86-5EFEF6CCE871}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{170DB0F8-C1CB-47AA-8B86-5EFEF6CCE871}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{170DB0F8-C1CB-47AA-8B86-5EFEF6CCE871}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{170DB0F8-C1CB-47AA-8B86-5EFEF6CCE871}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
