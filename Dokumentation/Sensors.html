@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRTG Prototype</title>
+  <style>
+    html, body { margin:0; height:100%; overflow:hidden; background:#0f172a; font-family:system-ui,sans-serif; }
+    #app { width:100%; height:100%; position:relative; }
+    #ui {
+      position:absolute; top:12px; left:12px; z-index:10; color:#e2e8f0;
+      background:rgba(15,23,42,0.98); border:1px solid rgba(148,163,184,.35);
+      border-radius:10px; padding:10px 12px; min-width:280px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,.28);
+    }
+    #ui h3 { margin:0 0 8px; font-size:14px; }
+    #ui .row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+    #ui button { background:#1e293b; color:#e2e8f0; border:1px solid rgba(148,163,184,.35); border-radius:8px; padding:6px 10px; cursor:pointer; }
+    #ui button:hover { background:#334155; }
+    #ui label { display:flex; gap:8px; align-items:center; font-size:12px; margin:4px 0; }
+    #legend { font-size:11px; opacity:.95; line-height:1.35; margin-top:8px; }
+    #errorBox { position:absolute; right:12px; top:12px; z-index:20; max-width:580px; display:none; white-space:pre-wrap;
+      background:rgba(127,29,29,.95); color:#fee2e2; border:1px solid rgba(248,113,113,.5); border-radius:10px; padding:10px 12px; font-size:12px; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="ui">
+    <h3>PRTG Prototype</h3>
+    <div class="row">
+      <button id="topViewBtn">Draufsicht</button>
+      <button id="isoViewBtn">Isometrisch</button>
+      <button id="fitBtn">Alles anzeigen</button>
+    </div>
+    <label><input type="checkbox" id="layer0Toggle" checked> Layer 0</label>
+    <label><input type="checkbox" id="layer1Toggle" checked> Layer 1</label>
+    <label><input type="checkbox" id="layer2Toggle" checked> Layer 2</label>
+    <label><input type="checkbox" id="layer3Toggle" checked> Layer 3</label>
+    <label><input type="checkbox" id="planesToggle" checked> Layer-Ringe</label>
+    <div id="camInfo" style="font-size:11px; line-height:1.35; margin-top:8px; padding:8px; border:1px solid rgba(148,163,184,.2); border-radius:8px; background:rgba(15,23,42,.35); white-space:pre-line;">Kamera: -</div>
+    <div id="legend">
+      Bedienung:<br>
+      • Mausrad = Zoom<br>
+      • Linke Maustaste ziehen = Drehen<br>
+      • Rechte Maustaste ziehen = Panning<br>
+      • Shift + Linke Maustaste = Panning<br>
+      • Strg + Mausbewegung = Kamera bewegen (Browser/OS-abhängig)<br>
+      • Buttons oben: Draufsicht / Isometrisch / Alles anzeigen
+    </div>
+  </div>
+  <div id="errorBox"></div>
+</div>
+
+<script id="prtgData" type="application/json">
+{
+  "layers": [
+    { "id": 0, "name": "Layer 0 (Basis)", "y": 0,  "ringColor": "#7f1d1d" },
+    { "id": 1, "name": "Layer 1 (Typen)", "y": 16, "ringColor": "#1e3a8a" },
+    { "id": 2, "name": "Layer 2 (Systeme)", "y": 32, "ringColor": "#14532d" },
+    { "id": 3, "name": "Layer 3 (Rollen)", "y": 48, "ringColor": "#6d28d9" }
+  ],
+  "nodes": [
+    { "id": "basic", "type": "device", "layer": 0, "label": "BasicDevice", "w": 18, "d": 9, "h": 1.4, "color": "#ef4444" },
+    { "id": "s_ping_basic", "type": "sensor", "layer": 0, "label": "Ping", "r": 4.8, "h": 1.2, "color": "#f87171" },
+    { "id": "s_cpu_basic",  "type": "sensor", "layer": 0, "label": "CPU Load",  "r": 4.8, "h": 1.2, "color": "#fb7185" },
+    { "id": "s_mem_basic",  "type": "sensor", "layer": 0, "label": "Memory Usage", "r": 4.8, "h": 1.2, "color": "#fca5a5" },
+    { "id": "s_uptime_basic", "type": "sensor", "layer": 0, "label": "Uptime", "r": 4.8, "h": 1.2, "color": "#fecdd3" },
+    { "id": "s_time_basic",   "type": "sensor", "layer": 0, "label": "Time",   "r": 4.8, "h": 1.2, "color": "#ffe4e6" },
+
+    { "id": "netType",  "type": "device", "layer": 1, "label": "NetworkDevice", "w": 22, "d": 10, "h": 1.4, "color": "#3b82f6" },
+    { "id": "hostType", "type": "device", "layer": 1, "label": "Host",          "w": 16, "d": 10, "h": 1.4, "color": "#22c55e" },
+    { "id": "s_host_diskusage", "type": "sensor", "layer": 1, "label": "DiskUsage", "r": 4.5, "h": 1.2, "color": "#86efac" },
+
+    { "id": "switch",      "type": "device", "layer": 2, "label": "Switch",      "w": 15, "d": 8, "h": 1.4, "color": "#60a5fa" },
+    { "id": "firewall",    "type": "device", "layer": 2, "label": "Firewall",    "w": 16, "d": 8, "h": 1.4, "color": "#2563eb" },
+    { "id": "windowsHost", "type": "device", "layer": 2, "label": "WindowsHost", "w": 20, "d": 8, "h": 1.4, "color": "#4ade80" },
+    { "id": "linuxHost",   "type": "device", "layer": 2, "label": "LinuxHost",   "w": 18, "d": 8, "h": 1.4, "color": "#16a34a" },
+
+    { "id": "s_switch_port",      "type": "sensor", "layer": 2, "label": "Port",        "r": 4.3, "h": 1.2, "color": "#bfdbfe" },
+    { "id": "s_switch_stats",     "type": "sensor", "layer": 2, "label": "PortStats",   "r": 4.3, "h": 1.2, "color": "#dbeafe" },
+    { "id": "s_fw_bw",             "type": "sensor", "layer": 2, "label": "BW",          "r": 4.3, "h": 1.2, "color": "#93c5fd" },
+    { "id": "s_fw_events",         "type": "sensor", "layer": 2, "label": "CritEvents",  "r": 4.3, "h": 1.2, "color": "#bfdbfe" },
+    { "id": "s_net_temp",      "type": "sensor", "layer": 1, "label": "Temp", "r": 4.5, "h": 1.2, "color": "#bfdbfe" },
+    { "id": "s_win_wmi",       "type": "sensor", "layer": 2, "label": "WMI",        "r": 4.3, "h": 1.2, "color": "#86efac" },
+    { "id": "s_win_updates",   "type": "sensor", "layer": 2, "label": "WinUpdates", "r": 4.3, "h": 1.2, "color": "#bbf7d0" },
+    { "id": "s_win_rdp",       "type": "sensor", "layer": 2, "label": "RDP",        "r": 4.3, "h": 1.2, "color": "#dcfce7" },
+    { "id": "s_lnx_ssh",     "type": "sensor", "layer": 2, "label": "SSH",  "r": 4.3, "h": 1.2, "color": "#86efac" },
+
+    { "id": "dc",         "type": "device", "layer": 3, "label": "DomainController", "w": 20, "d": 8, "h": 1.4, "color": "#c4b5fd" },
+    { "id": "fileserver", "type": "device", "layer": 3, "label": "Fileserver",       "w": 16, "d": 8, "h": 1.4, "color": "#a78bfa" },
+    { "id": "jumphost",   "type": "device", "layer": 3, "label": "Jumphost",         "w": 15, "d": 8, "h": 1.4, "color": "#8b5cf6" },
+    { "id": "iis",        "type": "device", "layer": 3, "label": "IIS",              "w": 12, "d": 8, "h": 1.4, "color": "#7c3aed" },
+    { "id": "hyperv",     "type": "device", "layer": 3, "label": "HyperV",           "w": 14, "d": 8, "h": 1.4, "color": "#6d28d9" },
+    { "id": "webserver",  "type": "device", "layer": 3, "label": "Webserver",        "w": 18, "d": 8, "h": 1.4, "color": "#22c55e" },
+    { "id": "esx",        "type": "device", "layer": 3, "label": "ESX",              "w": 12, "d": 8, "h": 1.4, "color": "#15803d" },
+
+    { "id": "s_dc_ldap",            "type": "sensor", "layer": 3, "label": "LDAP",         "r": 4.0, "h": 1.2, "color": "#ddd6fe" },
+    { "id": "s_dc_services",       "type": "sensor", "layer": 3, "label": "DNS/Domain",   "r": 4.0, "h": 1.2, "color": "#ede9fe" },
+    { "id": "s_dc_health",         "type": "sensor", "layer": 3, "label": "Health",       "r": 4.0, "h": 1.2, "color": "#ddd6fe" },
+    { "id": "s_fs_disk",            "type": "sensor", "layer": 3, "label": "Disk",         "r": 4.0, "h": 1.2, "color": "#ddd6fe" },
+    { "id": "s_fs_smb",             "type": "sensor", "layer": 3, "label": "SMB",          "r": 4.0, "h": 1.2, "color": "#ede9fe" },
+    { "id": "s_jump_rdp",  "type": "sensor", "layer": 3, "label": "RDP",  "r": 4.0, "h": 1.2, "color": "#c4b5fd" },
+    { "id": "s_iis_http",           "type": "sensor", "layer": 3, "label": "HTTP",         "r": 4.0, "h": 1.2, "color": "#c4b5fd" },
+    { "id": "s_iis_https",          "type": "sensor", "layer": 3, "label": "HTTPS",        "r": 4.0, "h": 1.2, "color": "#ddd6fe" },
+    { "id": "s_iis_cert",           "type": "sensor", "layer": 3, "label": "Certs",        "r": 4.0, "h": 1.2, "color": "#ede9fe" },
+    { "id": "s_iis_sec",            "type": "sensor", "layer": 3, "label": "SecSuite",     "r": 4.0, "h": 1.2, "color": "#ddd6fe" },
+    { "id": "s_iis_services",       "type": "sensor", "layer": 3, "label": "IIS Svc",      "r": 4.0, "h": 1.2, "color": "#c4b5fd" },
+    { "id": "s_hv_vm",              "type": "sensor", "layer": 3, "label": "VM",           "r": 4.0, "h": 1.2, "color": "#a78bfa" },
+    { "id": "s_hv_services",        "type": "sensor", "layer": 3, "label": "HV Svc",       "r": 4.0, "h": 1.2, "color": "#c4b5fd" },
+    { "id": "s_web_http",           "type": "sensor", "layer": 3, "label": "HTTP",         "r": 4.0, "h": 1.2, "color": "#86efac" },
+    { "id": "s_web_https",          "type": "sensor", "layer": 3, "label": "HTTPS",        "r": 4.0, "h": 1.2, "color": "#bbf7d0" },
+    { "id": "s_web_cert",           "type": "sensor", "layer": 3, "label": "Certs",        "r": 4.0, "h": 1.2, "color": "#dcfce7" },
+    { "id": "s_web_sec",            "type": "sensor", "layer": 3, "label": "SecSuite",     "r": 4.0, "h": 1.2, "color": "#bbf7d0" },
+    { "id": "s_esx_host",           "type": "sensor", "layer": 3, "label": "Host",         "r": 4.0, "h": 1.2, "color": "#86efac" },
+    { "id": "s_esx_events",         "type": "sensor", "layer": 3, "label": "CritEvents",   "r": 4.0, "h": 1.2, "color": "#bbf7d0" }
+  ],
+  "edges": [
+    { "from":"basic","to":"s_ping_basic","kind":"sensor","color":"#94a3b8" },
+    { "from":"basic","to":"s_cpu_basic", "kind":"sensor","color":"#94a3b8" },
+    { "from":"basic","to":"s_mem_basic", "kind":"sensor","color":"#94a3b8" },
+    { "from":"basic","to":"s_uptime_basic", "kind":"sensor","color":"#94a3b8" },
+    { "from":"basic","to":"s_time_basic",   "kind":"sensor","color":"#94a3b8" },
+
+    { "from":"basic","to":"netType",  "kind":"hier","color":"#fbbf24" },
+    { "from":"basic","to":"hostType", "kind":"hier","color":"#fbbf24" },
+
+    { "from":"netType","to":"switch",      "kind":"hier","color":"#fbbf24" },
+    { "from":"netType","to":"firewall",    "kind":"hier","color":"#fbbf24" },
+    { "from":"hostType","to":"windowsHost", "kind":"hier","color":"#fbbf24" },
+    { "from":"hostType","to":"linuxHost",   "kind":"hier","color":"#fbbf24" },
+
+    { "from":"switch","to":"s_switch_port",  "kind":"sensor","color":"#94a3b8" },
+    { "from":"switch","to":"s_switch_stats", "kind":"sensor","color":"#94a3b8" },
+    { "from":"firewall","to":"s_fw_bw",      "kind":"sensor","color":"#94a3b8" },
+    { "from":"firewall","to":"s_fw_events",  "kind":"sensor","color":"#94a3b8" },
+    { "from":"netType","to":"s_net_temp",   "kind":"sensor","color":"#94a3b8" },
+    { "from":"windowsHost","to":"s_win_wmi",     "kind":"sensor","color":"#94a3b8" },
+    { "from":"windowsHost","to":"s_win_updates", "kind":"sensor","color":"#94a3b8" },
+    { "from":"windowsHost","to":"s_win_rdp",     "kind":"sensor","color":"#94a3b8" },
+    { "from":"linuxHost","to":"s_lnx_ssh", "kind":"sensor","color":"#94a3b8" },
+    { "from":"hostType","to":"s_host_diskusage", "kind":"sensor","color":"#94a3b8" },
+
+    { "from":"windowsHost","to":"dc",         "kind":"hier","color":"#fbbf24" },
+    { "from":"windowsHost","to":"fileserver", "kind":"hier","color":"#fbbf24" },
+    { "from":"windowsHost","to":"jumphost",   "kind":"hier","color":"#fbbf24" },
+    { "from":"windowsHost","to":"iis",        "kind":"hier","color":"#fbbf24" },
+    { "from":"windowsHost","to":"hyperv",     "kind":"hier","color":"#fbbf24" },
+    { "from":"linuxHost","to":"webserver",    "kind":"hier","color":"#fbbf24" },
+    { "from":"linuxHost","to":"esx",          "kind":"hier","color":"#fbbf24" },
+
+    { "from":"dc","to":"s_dc_ldap",           "kind":"sensor","color":"#94a3b8" },
+    { "from":"dc","to":"s_dc_services",      "kind":"sensor","color":"#94a3b8" },
+    { "from":"dc","to":"s_dc_health",        "kind":"sensor","color":"#94a3b8" },
+    { "from":"fileserver","to":"s_fs_disk",   "kind":"sensor","color":"#94a3b8" },
+    { "from":"fileserver","to":"s_fs_smb",    "kind":"sensor","color":"#94a3b8" },
+    { "from":"jumphost","to":"s_jump_rdp",  "kind":"sensor","color":"#94a3b8" },
+    { "from":"iis","to":"s_iis_http",         "kind":"sensor","color":"#94a3b8" },
+    { "from":"iis","to":"s_iis_https",        "kind":"sensor","color":"#94a3b8" },
+    { "from":"iis","to":"s_iis_cert",         "kind":"sensor","color":"#94a3b8" },
+    { "from":"iis","to":"s_iis_sec",          "kind":"sensor","color":"#94a3b8" },
+    { "from":"iis","to":"s_iis_services",     "kind":"sensor","color":"#94a3b8" },
+    { "from":"hyperv","to":"s_hv_vm",          "kind":"sensor","color":"#94a3b8" },
+    { "from":"hyperv","to":"s_hv_services",   "kind":"sensor","color":"#94a3b8" },
+    { "from":"webserver","to":"s_web_http",    "kind":"sensor","color":"#94a3b8" },
+    { "from":"webserver","to":"s_web_https",   "kind":"sensor","color":"#94a3b8" },
+    { "from":"webserver","to":"s_web_cert",    "kind":"sensor","color":"#94a3b8" },
+    { "from":"webserver","to":"s_web_sec",     "kind":"sensor","color":"#94a3b8" },
+    { "from":"esx","to":"s_esx_host",         "kind":"sensor","color":"#94a3b8" },
+    { "from":"esx","to":"s_esx_events",       "kind":"sensor","color":"#94a3b8" }
+  ]
+}
+</script>
+
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+  const app = document.getElementById('app');
+  const errorBox = document.getElementById('errorBox');
+  function fail(msg, err){
+    console.error(msg, err);
+    errorBox.style.display='block';
+    errorBox.textContent = msg + (err ? "\n\n" + (err.stack || err.message || String(err)) : '');
+  }
+  try {
+    const DATA = JSON.parse(document.getElementById('prtgData').textContent);
+    const LAYER_Y = Object.fromEntries((DATA.layers||[]).map(l => [l.id, l.y]));
+    const toNum = (c, fb=0xffffff) => { const n = Number(String(c||'').replace('#','0x')); return Number.isFinite(n) ? n : fb; };
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0f172a);
+
+    const camera = new THREE.PerspectiveCamera(45, app.clientWidth/app.clientHeight, 0.1, 1500);
+    const renderer = new THREE.WebGLRenderer({ antialias:true });
+    renderer.setSize(app.clientWidth, app.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+    app.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    const camInfoEl = document.getElementById('camInfo');
+    controls.enableDamping = true;
+    controls.target.set(0, 8, 0);
+    controls.minDistance = 20;
+    controls.maxDistance = 280;
+    controls.maxPolarAngle = Math.PI * 0.495;
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.72));
+    const dir = new THREE.DirectionalLight(0xffffff, 0.82);
+    dir.position.set(50, 70, 40);
+    scene.add(dir);
+
+    const grid = new THREE.GridHelper(220, 22, 0x475569, 0x334155);
+    grid.position.y = -0.03;
+    scene.add(grid);
+
+    const layerGroups = {};
+    const ringGroups = {};
+    [0,1,2,3].forEach(id => { layerGroups[id] = new THREE.Group(); ringGroups[id] = new THREE.Group(); scene.add(layerGroups[id], ringGroups[id]); });
+
+    // Halbtransparente Layer-Ebenen (wieder sichtbar wie zuvor)
+    const layerPlanes = {};
+    const connectors = [];
+    const orbitGuideLines = []; // Layer-Ringe + Mond-Orbits, damit Toggle sauber alles ein/ausblendet
+
+    function roundRect(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+    function makeTextTexture(text, fontSize, color, bg){
+      const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+      ctx.font = `700 ${fontSize}px system-ui, sans-serif`;
+      const tw = Math.ceil(ctx.measureText(text).width);
+      c.width = Math.max(220, tw + 28); c.height = 58;
+      ctx.font = `700 ${fontSize}px system-ui, sans-serif`;
+      if(bg){ ctx.fillStyle = bg; roundRect(ctx,1,1,c.width-2,c.height-2,10); ctx.fill(); }
+      ctx.fillStyle = color; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(text, c.width/2, c.height/2 + 1);
+      const t = new THREE.CanvasTexture(c); t.minFilter = THREE.LinearFilter; t.generateMipmaps = false; return { texture:t, width:c.width, height:c.height };
+    }
+    function makeTopLabel(text, w, h, opts={}){
+      const tt = makeTextTexture(text, opts.fontSize || 32, opts.textColor || '#0b1220', null);
+      // Labels sollen von Objekten verdeckt werden können (kein Always-on-top)
+      const mat = new THREE.MeshBasicMaterial({ map: tt.texture, transparent:true, depthWrite:false, depthTest:true, side:THREE.DoubleSide });
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), mat);
+      m.rotation.x = -Math.PI/2; m.renderOrder = 300; return m;
+    }
+    function makeFlatLayerLabel(text, y){
+      const tt = makeTextTexture(text, 26, '#cbd5e1', 'rgba(15,23,42,0.55)');
+      const mat = new THREE.MeshBasicMaterial({ map: tt.texture, transparent:true, depthWrite:false, depthTest:true, side:THREE.DoubleSide, opacity:0.85 });
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(42, 8), mat);
+      m.rotation.x = -Math.PI/2;
+      m.position.set(-86, y+0.03, -82);
+      m.renderOrder = 0;
+      return m;
+    }
+
+    function createDevice(n){
+      const h = n.h || 1.4, w = n.w || 16, d = n.d || 9;
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshPhongMaterial({ color: toNum(n.color,0x94a3b8) }));
+      mesh.position.y = (LAYER_Y[n.layer]||0) + h/2;
+      mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d)), new THREE.LineBasicMaterial({ color:0x0b1220, transparent:true, opacity:0.65 })));
+      const label = makeTopLabel(n.label || n.id, Math.max(6, w*0.92), Math.min(4.6, d*0.72), { fontSize: 28, textColor:'#0b1220' });
+      label.position.set(0, h/2 + 0.16, 0);
+      mesh.add(label);
+      mesh.userData = { id:n.id, layer:n.layer, type:'device', def:n };
+      layerGroups[n.layer].add(mesh);
+      return mesh;
+    }
+    function createSensor(n){
+      const h = n.h || 1.2, r = n.r || 4;
+      const mesh = new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,28), new THREE.MeshPhongMaterial({ color: toNum(n.color,0xe2e8f0) }));
+      mesh.position.y = (LAYER_Y[n.layer]||0) + h/2;
+      mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CylinderGeometry(r,r,h,16)), new THREE.LineBasicMaterial({ color:0x0b1220, transparent:true, opacity:0.45 })));
+      const label = makeTopLabel(n.label || n.id, r*1.95, r*1.28, { fontSize: (String(n.label||'').length > 8 ? 24 : 30), textColor:'#0b1220' });
+      label.position.set(0, h/2 + 0.16, 0);
+      mesh.add(label);
+      mesh.userData = { id:n.id, layer:n.layer, type:'sensor', def:n };
+      layerGroups[n.layer].add(mesh);
+      return mesh;
+    }
+
+    function addLine(a, b, color){
+      const g = new THREE.BufferGeometry().setFromPoints([a.position.clone(), b.position.clone()]);
+      const line = new THREE.Line(g, new THREE.LineBasicMaterial({ color, transparent:true, opacity:0.9 }));
+      scene.add(line);
+      connectors.push({ kind:'line', line, a, b, update(){ const arr = line.geometry.attributes.position.array; arr[0]=a.position.x; arr[1]=a.position.y; arr[2]=a.position.z; arr[3]=b.position.x; arr[4]=b.position.y; arr[5]=b.position.z; line.geometry.attributes.position.needsUpdate = true; } });
+      return line;
+    }
+
+    function addBezier(a, b, color){
+      const curve = new THREE.QuadraticBezierCurve3(
+        a.position.clone(),
+        new THREE.Vector3((a.position.x+b.position.x)/2, Math.max(a.position.y,b.position.y) + 4, (a.position.z+b.position.z)/2),
+        b.position.clone()
+      );
+      const pts = curve.getPoints(30);
+      const g = new THREE.BufferGeometry().setFromPoints(pts);
+      const line = new THREE.Line(g, new THREE.LineBasicMaterial({ color, transparent:true, opacity:0.85 }));
+      scene.add(line);
+      connectors.push({ kind:'bezier', line, a, b, update(){
+        const c = new THREE.QuadraticBezierCurve3(
+          a.position.clone(),
+          new THREE.Vector3((a.position.x+b.position.x)/2, Math.max(a.position.y,b.position.y) + 4, (a.position.z+b.position.z)/2),
+          b.position.clone()
+        );
+        line.geometry.dispose();
+        line.geometry = new THREE.BufferGeometry().setFromPoints(c.getPoints(30));
+      }});
+      return line;
+    }
+
+    // Ring-Guides + Layerlabels + Layer-Ebenen
+    const ringR = {0:0,1:26,2:50,3:92};
+    (DATA.layers||[]).forEach(l => {
+      const y = l.y || 0;
+      const grp = ringGroups[l.id] || scene;
+
+      // Layer-Ebene (transparente Fläche)
+      const planeColor = toNum(l.ringColor, 0x64748b);
+      const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(190, 190),
+        new THREE.MeshPhongMaterial({ color: planeColor, transparent: true, opacity: 0.045, side: THREE.DoubleSide, depthWrite: false })
+      );
+      plane.rotation.x = -Math.PI/2;
+      plane.position.y = y;
+      plane.renderOrder = -5;
+      grp.add(plane);
+      layerPlanes[l.id] = plane;
+
+      if(l.id > 0){
+        const pts = []; const seg=128; const R = ringR[l.id] || 20;
+        for(let i=0;i<=seg;i++){ const a=(i/seg)*Math.PI*2; pts.push(new THREE.Vector3(Math.cos(a)*R, y+0.05, Math.sin(a)*R)); }
+        const ringLine = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints(pts),
+          new THREE.LineBasicMaterial({ color: planeColor, transparent:true, opacity:0.25 })
+        );
+        grp.add(ringLine);
+        orbitGuideLines.push(ringLine);
+      }
+      grp.add(makeFlatLayerLabel(l.name || `Layer ${l.id}`, y));
+    });
+
+    const defsById = {}; (DATA.nodes||[]).forEach(n => defsById[n.id] = n);
+    const nodeMap = {};
+    (DATA.nodes||[]).forEach(n => nodeMap[n.id] = (n.type === 'device' ? createDevice(n) : createSensor(n)));
+
+    // Planetenpositionen (kompakt + ohne Hauptkreuzungen)
+    const A = {
+      basic: 0,
+      netType: Math.PI,
+      hostType: 0,
+
+      switch: Math.PI - 0.52,
+      firewall: Math.PI + 0.52,
+      windowsHost: -0.46,
+      linuxHost: 0.46,
+
+      // Layer 3 stärker entlang des Rings verteilt (gleichmäßiger, weniger Kollisionen)
+      dc: -1.14,
+      fileserver: -0.64,
+      jumphost: -0.26,
+      iis: 0.14,
+      hyperv: 0.56,
+      webserver: 1.12,
+      esx: 1.54
+    };
+
+    Object.values(nodeMap).forEach(o => {
+      if(o.userData.type !== 'device') return;
+      const id = o.userData.id, lid = o.userData.layer;
+      const R = ringR[lid] || 0;
+      const ang = A[id] != null ? A[id] : 0;
+      o.position.x = Math.cos(ang) * R;
+      o.position.z = Math.sin(ang) * R;
+      o.userData.angle = ang;
+    });
+
+    // Sensoren als Monde (gleichmäßig pro Planet)
+    const sensorParent = {};
+    const sensorIdsByDevice = {};
+    (DATA.edges||[]).forEach(e => {
+      const from = defsById[e.from], to = defsById[e.to];
+      if(from && to && from.type === 'device' && to.type === 'sensor') {
+        sensorParent[to.id] = from.id;
+        if(!sensorIdsByDevice[from.id]) sensorIdsByDevice[from.id] = [];
+        sensorIdsByDevice[from.id].push(to.id);
+      }
+    });
+
+    Object.entries(sensorIdsByDevice).forEach(([devId, sensorIds]) => {
+      const devObj = nodeMap[devId]; if(!devObj) return;
+      const d = devObj.userData.def || {};
+      const planetR = Math.max((d.w||16)*0.45, (d.d||8)*0.55, 6);
+      const moonOrbitR = planetR + (sensorIds.length >= 5 ? 18 : sensorIds.length >= 4 ? 16 : sensorIds.length >= 3 ? 13 : 8);
+      // Auf Layer 3 etwas mehr Abstand für Rollen + Sensorlabels
+      const extraOuter = (devObj.userData.layer === 3) ? 3 : 0;
+      const finalMoonOrbitR = moonOrbitR + extraOuter;
+      const y = devObj.position.y + 0.05;
+      // Mini-Orbit Guide
+      const pts = []; const seg = 60;
+      for(let i=0;i<=seg;i++){ const a=(i/seg)*Math.PI*2; pts.push(new THREE.Vector3(devObj.position.x + Math.cos(a)*finalMoonOrbitR, y, devObj.position.z + Math.sin(a)*finalMoonOrbitR)); }
+      const moonOrbitLine = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(pts),
+        new THREE.LineBasicMaterial({ color:0xcbd5e1, transparent:true, opacity:0.12 })
+      );
+      scene.add(moonOrbitLine);
+      orbitGuideLines.push(moonOrbitLine);
+
+      const outward = Math.atan2(devObj.position.z, devObj.position.x);
+      const cnt = sensorIds.length;
+      let angles = [];
+      if(cnt === 1) angles = [outward];
+      else if(cnt === 2) angles = [outward - 0.55, outward + 0.55];
+      else if(cnt === 3) angles = [outward, outward + (2*Math.PI/3), outward - (2*Math.PI/3)];
+      else if(cnt === 4) angles = [outward - 0.95, outward + 0.95, outward + Math.PI - 0.95, outward + Math.PI + 0.95];
+      else if(cnt === 5) angles = [outward, outward + 0.95, outward - 0.95, outward + 2.15, outward - 2.15];
+      else angles = Array.from({length:cnt}, (_,k)=> outward + (k/cnt)*Math.PI*2);
+
+      sensorIds.forEach((sid, i) => {
+        const s = nodeMap[sid]; if(!s) return;
+        const a = angles[i] ?? (outward + (i/Math.max(1,cnt))*Math.PI*2);
+        s.position.x = devObj.position.x + Math.cos(a) * finalMoonOrbitR;
+        s.position.z = devObj.position.z + Math.sin(a) * finalMoonOrbitR;
+      });
+    });
+
+    // Verbindungen zeichnen
+    (DATA.edges||[]).forEach(e => {
+      const a = nodeMap[e.from], b = nodeMap[e.to]; if(!a || !b) return;
+      const color = toNum(e.color, 0x94a3b8);
+      if(e.kind === 'hier') addBezier(a,b,color); else {
+        const l = addLine(a,b,color);
+        l.material.opacity = 0.55;
+      }
+    });
+
+    function refreshVisibility(){
+      connectors.forEach(c => {
+        const av = layerGroups[c.a.userData.layer]?.visible !== false;
+        const bv = layerGroups[c.b.userData.layer]?.visible !== false;
+        c.line.visible = av && bv;
+      });
+    }
+    function setLayerVisible(id, v){
+      if(layerGroups[id]) layerGroups[id].visible = v;
+      if(ringGroups[id]) ringGroups[id].visible = v && document.getElementById('planesToggle').checked;
+      refreshVisibility();
+    }
+    function topView(){ camera.position.set(0, 165, 0.01); controls.target.set(0, 10, 0); controls.update(); }
+    function isoView(){ camera.position.set(6.75, 173.52, 127.53); controls.target.set(3.96, 14.97, -3.69); camera.zoom = 1.00; camera.updateProjectionMatrix(); controls.update(); }
+    function fitAll(){ camera.position.set(6.75, 173.52, 127.53); controls.target.set(3.96, 14.97, -3.69); camera.zoom = 1.00; camera.updateProjectionMatrix(); controls.update(); }
+
+    document.getElementById('topViewBtn').onclick = topView;
+    document.getElementById('isoViewBtn').onclick = isoView;
+    document.getElementById('fitBtn').onclick = fitAll;
+    [0,1,2,3].forEach(id => {
+      const el = document.getElementById(`layer${id}Toggle`); if(el) el.onchange = e => setLayerVisible(id, e.target.checked);
+    });
+    document.getElementById('planesToggle').onchange = e => {
+      const on = e.target.checked;
+      [0,1,2,3].forEach(id => {
+        if(ringGroups[id]) ringGroups[id].visible = on && layerGroups[id].visible;
+      });
+      // Alle Mond-Orbits zusätzlich mit toggeln
+      orbitGuideLines.forEach(l => l.visible = on);
+    };
+
+    isoView();
+    [0,1,2,3].forEach(id => setLayerVisible(id, true));
+
+    window.addEventListener('resize', () => {
+      camera.aspect = app.clientWidth / app.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(app.clientWidth, app.clientHeight);
+    });
+
+    (function animate(){
+      requestAnimationFrame(animate);
+      controls.update();
+      connectors.forEach(c => c.update());
+
+      // Kamera-Infos für gute Startposition finden
+      if (camInfoEl) {
+        const p = camera.position;
+        const t = controls.target;
+        const dx = p.x - t.x, dy = p.y - t.y, dz = p.z - t.z;
+        const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+        const yaw = Math.atan2(dx, dz) * 180 / Math.PI;      // um Y-Achse
+        const pitch = Math.atan2(dy, Math.sqrt(dx*dx + dz*dz)) * 180 / Math.PI; // Neigung
+        const zoomVal = (camera.isPerspectiveCamera ? camera.zoom : camera.zoom);
+        camInfoEl.textContent =
+          `Kamera Position: x=${p.x.toFixed(2)}  y=${p.y.toFixed(2)}  z=${p.z.toFixed(2)}
+` +
+          `Kamera Angle: yaw=${yaw.toFixed(1)}°  pitch=${pitch.toFixed(1)}°
+` +
+          `Zoom: ${zoomVal.toFixed(2)}  (Distanz=${dist.toFixed(2)})
+` +
+          `Pan (Target): x=${t.x.toFixed(2)}  y=${t.y.toFixed(2)}  z=${t.z.toFixed(2)}`;
+      }
+
+      renderer.render(scene, camera);
+    })();
+  } catch(err) { fail('Rendering konnte nicht gestartet werden.', err); }
+})();
+</script>
+</body>
+</html>
