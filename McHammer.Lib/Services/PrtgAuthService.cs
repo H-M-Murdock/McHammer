@@ -27,7 +27,7 @@ public class PrtgAuthService : IPrtgAuthService
     public async Task<PrtgAuthResult> AuthenticateAsync(CancellationToken ct = default)
     {
         // getstatus.htm ist der zuverlässige Endpunkt auf Port 443
-        var query = BuildAuthQuery();
+        var query = _config.BuildAuthQuery();
         var url   = $"/api/getstatus.htm?{query}";
 
         try
@@ -46,21 +46,6 @@ public class PrtgAuthService : IPrtgAuthService
         {
             return new PrtgAuthResult(false, string.Empty, string.Empty, $"Fehler: {ex.Message}");
         }
-    }
-
-    // Für spätere API-Aufrufe (table.xml etc.) – Auth als Query anhängen
-    public string BuildAuthQuery()
-    {
-        if (!string.IsNullOrWhiteSpace(_config.ApiKey))
-            return $"apitoken={Uri.EscapeDataString(_config.ApiKey)}";
-
-        if (!string.IsNullOrWhiteSpace(_config.User) && !string.IsNullOrWhiteSpace(_config.PasHash))
-            return $"username={Uri.EscapeDataString(_config.User)}&passhash={Uri.EscapeDataString(_config.PasHash)}";
-
-        if (!string.IsNullOrWhiteSpace(_config.User) && !string.IsNullOrWhiteSpace(_config.Password))
-            return $"username={Uri.EscapeDataString(_config.User)}&password={Uri.EscapeDataString(_config.Password)}";
-
-        throw new InvalidOperationException("Keine gültige Auth-Konfiguration gefunden.");
     }
 
     private static PrtgAuthResult ParseStatusResponse(string json)

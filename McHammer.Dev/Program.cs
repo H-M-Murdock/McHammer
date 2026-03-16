@@ -1,15 +1,14 @@
 ﻿using McHammer.Dev;
 using McHammer.Dev.Commands.Auth;
 using McHammer.Dev.Commands.Info;
+using McHammer.Dev.Commands.Network;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 var app = new App();
 
-// ── Commands registrieren ──────────────────────────────
 app.Register(new TestAuthCommand());
 app.Register(new ShowConfigCommand());
-// weitere Commands hier einfach hinzufügen
+app.Register(new SyncFunctionGroupsCommand()); 
 
-// ──────────────────────────────────────────────────────
 await app.RunAsync();

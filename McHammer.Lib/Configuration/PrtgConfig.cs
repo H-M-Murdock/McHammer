@@ -9,6 +9,20 @@ public class PrtgConfig
     public string Password     { get; init; } = string.Empty;
     public string User         { get; init; } = string.Empty;
 
+    public string BuildAuthQuery()
+    {
+        if (!string.IsNullOrWhiteSpace(ApiKey))
+            return $"apitoken={Uri.EscapeDataString(ApiKey)}";
+
+        if (!string.IsNullOrWhiteSpace(User) && !string.IsNullOrWhiteSpace(PasHash))
+            return $"username={Uri.EscapeDataString(User)}&passhash={Uri.EscapeDataString(PasHash)}";
+
+        if (!string.IsNullOrWhiteSpace(User) && !string.IsNullOrWhiteSpace(Password))
+            return $"username={Uri.EscapeDataString(User)}&password={Uri.EscapeDataString(Password)}";
+
+        throw new InvalidOperationException("Keine gültige Auth-Konfiguration gefunden.");
+    }    
+    
     public static PrtgConfig FromEnvironment() => new()
     {
         ApiUrl   = Env("PRTG_API"),
