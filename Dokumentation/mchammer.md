@@ -27,6 +27,8 @@
 
 McHammer ist ein Kommandozeilen-Werkzeug zur automatisierten Verwaltung der PRTG-Monitoring-Struktur bei TAL Oil. Es besteht aus zwei Komponenten:
 
+![McHammer](tal_mc_menu.png)
+
 
 ### Was kann McHammer?
 
@@ -666,36 +668,4 @@ McHammer schreibt derzeit keine Protokolldateien. Alle Ausgaben erscheinen direk
 
 ---
 
-## Anhang: Screenshot-Übersicht
-
-Folgende Screenshots sollten unter `docs/screenshots/` abgelegt werden:
-
-| Dateiname | Kapitel | Inhalt |
-|---|---|---|
-| `env-variables-windows.png` | 2 | Umgebungsvariablen in Windows |
-| `prtg-apikey.png` | 2 | API-Key in PRTG erstellen |
-| `banner.png` | 3 | McHammer Startbildschirm |
-| `hauptmenue.png` | 3 | Hauptmenü Übersicht |
-| `config-anzeigen.png` | 4 | Config-Tabelle |
-| `test-auth.png` | 5 | Erfolgreiche Authentifizierung |
-| `diagnose-prtg.png` | 6 | Diagnose-Ausgabe |
-| `sync-dateiuebersicht.png` | 7 | JSON-Dateien Übersicht |
-| `sync-debug-auswahl.png` | 7 | Debug-Modus Strukturauswahl |
-| `sync-progress.png` | 7 | Fortschrittsbalken während Sync |
-| `sync-result.png` | 7 | Ergebnistabelle nach Sync |
-| `discovery-modus.png` | 8 | Modus-Auswahl |
-| `discovery-templates.png` | 8 | Template-Auswahl |
-| `discovery-level-select.png` | 8 | Level-3-Auswahl mit Pfad |
-| `discovery-result.png` | 8 | Ergebnis mit Diagnose-Tabelle |
-
-### Screenshots in VS Code einbinden
-
-```markdown
-![Beschreibung](docs/screenshots/dateiname.png)
-```
-
-Vorschau öffnen: **Strg+Shift+V**
-
----
-
-*McHammer Benutzerhandbuch — TAL Oil — Stand März 2025*
+*McHammer Benutzerhandbuch — TAL Oil — Stand März 2026*
