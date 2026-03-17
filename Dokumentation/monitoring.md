@@ -49,6 +49,17 @@ Das Monitoring erfasst die gesamte aktive Netzwerkinfrastruktur von TAL Oil:
 
 Das Monitoring bei TAL Oil ist **datengetrieben** — die Grundlage für alle Strukturen bildet eine vom Kunden gepflegte Netzwerkinventarliste. Aus dieser Liste wird automatisch die Monitoring-Struktur in PRTG abgeleitet.
 
+Die Aufbereitung übernimmt hier **GraphITy**
+
+<figure>
+  <img src="graphity_logo.png" alt="Excel Sites" style="border: 1px solid #ccc; border-radius: 10px; padding: 1px; max-width: 25%;">
+  <figcaption><em>GraphITy</em></figcaption>
+</figure>
+
+Die Synchronisation und Autmoatisierung **McHammer**
+
+
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                 │
@@ -70,7 +81,7 @@ Das Monitoring bei TAL Oil ist **datengetrieben** — die Grundlage für alle St
                         ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                 │
-│   Synchronisation in PRTG                                       │
+│   Synchronisation in PRTG durch McHammer                        │
 │   Gruppen & Struktur werden angelegt                            │
 │   Neue Segmente → automatisch hinzugefügt                       │
 │   Entfernte Segmente → als veraltet markiert                    │
