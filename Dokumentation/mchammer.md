@@ -64,7 +64,12 @@ McHammer liest alle Verbindungsdaten aus **Umgebungsvariablen**. Es werden keine
 3. Name und Wert eintragen, mit **OK** bestätigen
 4. Für jede Variable wiederholen
 
-![Environment Variablen](tal_system_env.png)
+
+<figure>
+  <img src="tal_system_env.png" alt="Anmerkung" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>Umgebungsvariablen</em></figcaption>
+</figure>
+
 
 Alternativ per PowerShell (als Administrator):
 
@@ -82,7 +87,12 @@ Alternativ per PowerShell (als Administrator):
 4. Rechte: mindestens **Lesen** und **Schreiben**
 5. Key kopieren und als `PRTG_APIKEY` speichern
 
-![Prtg API KEY](tal_prtg_apikey.png)
+
+<figure>
+  <img src="tal_prtg_apikey.png" alt="Anmerkung" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>API Key erstellen</em></figcaption>
+</figure>
+
 
 ---
 
@@ -159,7 +169,11 @@ Hauptmenü → **System** → **Config anzeigen**
 
 > ✅ Wenn `PRTG_API`, `PRTG_APIV2` und `PRTG_APIKEY` alle grün sind, ist McHammer korrekt konfiguriert. Die übrigen Variablen sind optional.
 
-![McHammer Config](tal_mc_config.png)
+<figure>
+  <img src="tal_mc_config.png" alt="Anmerkung" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>McHammer Configuration</em></figcaption>
+</figure>
+
 
 ---
 
@@ -198,7 +212,11 @@ Hauptmenü → **Authentifizierung** → **Test Auth**
         Format: langer Hash aus PRTG → Setup → API-Keys
 ```
 
-![McHammer Config](tal_mc_authtest.png)
+<figure>
+  <img src="tal_mc_authtest.png" alt="Anmerkung" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>Auth test</em></figcaption>
+</figure>
+
 
 ---
 
@@ -257,7 +275,12 @@ Liest alle Netzwerksegmente aus den JSON-Inventardateien und gleicht sie mit der
 - Jede Datei folgt dem Namensschema `*_USED.json`
 - PRTG-Verbindung funktioniert (Test Auth erfolgreich)
 
-![McHammer Discovery](tal_explorer_json.png)
+<figure>
+  <img src="tal_explorer_json.png" alt="Anmerkung" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>Explorer Ansicht</em></figcaption>
+</figure>
+
+
 
 ### Aufrufen
 
@@ -354,8 +377,18 @@ Der aktuelle Fortschritt wird als Balken angezeigt. Das aktuell verarbeitete Seg
 | – grau | `Vorhanden` | Gruppe existierte bereits — keine Änderung nötig |
 | ⚠ gelb | `Archiviert` | Gruppe in PRTG, aber nicht mehr im JSON — Tag `ARCHIVED_DATA` gesetzt |
 
-![McHammer Sync](tal_mc_sync_1.png)
-![McHammer Sync Result](tal_mc_sync_2.png)
+
+<figure>
+  <img src="tal_mc_sync_1.png" alt="Anmerkung" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>McHammer Synchronisation</em></figcaption>
+</figure>
+
+<figure>
+  <img src="tal_mc_sync_2.png" alt="Anmerkung" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>McHammer Synchronisation</em></figcaption>
+</figure>
+
+
 
 ---
 
@@ -471,8 +504,19 @@ Level 3 – Type wählen:
   [ ] Germany.SERVER T0.Server - Tier 0 - Domain Controller.Standard
 ```
 
-![McHammer Discovery](tal_mc_discovery.png)
-![McHammer Discovery 2](tal_mc_discovery_2.png)
+<figure>
+  <img src="tal_mc_discovery.png" alt="Anmerkung" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>McHammer Discovery</em></figcaption>
+</figure>
+
+
+<figure>
+  <img src="tal_mc_discovery_2.png" alt="Anmerkung" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>McHammer Discovery</em></figcaption>
+</figure>
+
+
+
 
 ---
 

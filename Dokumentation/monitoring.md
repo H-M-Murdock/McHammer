@@ -114,9 +114,23 @@ Jede Zeile der Liste beschreibt ein Netzwerksegment mit folgenden Feldern:
 | **Stadt** | Standortstadt | `München` |
 | **Status** | Aktiv / Inaktiv | `active` |
 
-![McHammer Discovery](tal_excel_sites.png)
-![McHammer Discovery](tal_excel_location.png)
-![McHammer Discovery](tal_excel_function.png)
+<figure>
+  <img src="tal_excel_sites.png" alt="Excel Sites" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>Excel Sites TAB</em></figcaption>
+</figure>
+
+
+<figure>
+  <img src="tal_excel_location.png" alt="Excel Location" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>Excel Location TAB</em></figcaption>
+</figure>
+
+
+<figure>
+  <img src="tal_excel_function.png" alt="Excel Function" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>Excel Function TAB</em></figcaption>
+</figure>
+
 
 ### Wer pflegt die Liste?
 
@@ -162,7 +176,10 @@ Die Excel-Datei wird in strukturierte JSON-Dateien aufgeteilt — eine Datei pro
     └── ...
 ```
 
-![McHammer Discovery](tal_explorer_json.png)
+<figure>
+  <img src="tal_explorer_json.png" alt="Explorer Json" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>Explorer View</em></figcaption>
+</figure>
 
 ### Schritt 3 — Synchronisation mit PRTG
 
@@ -237,7 +254,10 @@ TAL-GROUP                                    ← Wurzel (von TAL Oil verwaltet)
     └── ...
 ```
 
-![McHammer Discovery](tal_prtg_struktur.png)
+<figure>
+  <img src="tal_prtg_struktur.png" alt="PRTG Gruppenstruktur" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>Gruppenstruktur in PRTG unter TAL-GROUP</em></figcaption>
+</figure>
 
 ### Was bedeutet jede Ebene?
 
@@ -255,7 +275,12 @@ Das konkrete Netzwerksegment mit IP-Bereich, VLAN und Standortinformation. In de
 VLAN: 183 | 10.134.83.0/24 | München (D-MU-OF)
 ```
 
-![McHammer Discovery](tal_prtg_ANmerkung.png)
+
+
+<figure>
+  <img src="tal_prtg_ANmerkung.png" alt="Anmerkung" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>Anmerkung werden in PRTG übernommen</em></figcaption>
+</figure>
 
 **Ebene 3 — Gerätetyp (Type)**
 Beschreibt welche Art von Geräten in diesem Segment zu erwarten sind (z.B. `Tank Farm`, `Standard Server`). Auf dieser Ebene wird die automatische Geräteerkennung konfiguriert und ausgeführt.
@@ -299,8 +324,17 @@ Der zu scannende IP-Bereich ist direkt aus dem Netzwerkinventar abgeleitet. Für
 | Von | `1` | Startadresse des Scanbereichs |
 | Bis | `254` | Endadresse des Scanbereichs |
 
-![McHammer Discovery](tal_prtg_discovery.png)
-![McHammer Discovery](tal_prtg_discovery_2.png)
+
+<figure>
+  <img src="tal_prtg_discovery.png" alt="Anmerkung" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>PRTG Discovery Einstellungen</em></figcaption>
+</figure>
+
+<figure>
+  <img src="tal_prtg_discovery_2.png" alt="Anmerkung" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>PRTG Discovery Einstellungen</em></figcaption>
+</figure>
+
 
 ### Discovery-Status
 
@@ -337,7 +371,12 @@ Beispiele:
 | *(weitere nach Bedarf)* | |
 
 
-![McHammer Discovery](tal_prtg_templates.png)
+
+<figure>
+  <img src="tal_prtg_templates.png" alt="Anmerkung" style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 100%;">
+  <figcaption><em>PRTG Templates Einstellungen</em></figcaption>
+</figure>
+
 
 ### Wer verwaltet die Vorlagen?
 
