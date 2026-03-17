@@ -114,6 +114,10 @@ Jede Zeile der Liste beschreibt ein Netzwerksegment mit folgenden Feldern:
 | **Stadt** | Standortstadt | `München` |
 | **Status** | Aktiv / Inaktiv | `active` |
 
+![McHammer Discovery](tal_excel_sites.png)
+![McHammer Discovery](tal_excel_location.png)
+![McHammer Discovery](tal_excel_function.png)
+
 ### Wer pflegt die Liste?
 
 > **Verantwortung: TAL Oil IT-Abteilung**
@@ -158,6 +162,8 @@ Die Excel-Datei wird in strukturierte JSON-Dateien aufgeteilt — eine Datei pro
     └── ...
 ```
 
+![McHammer Discovery](tal_explorer_json.png)
+
 ### Schritt 3 — Synchronisation mit PRTG
 
 Der Synchronisationsprozess liest alle JSON-Dateien und gleicht sie mit der bestehenden PRTG-Struktur ab:
@@ -181,6 +187,7 @@ Für jedes Netzwerksegment in den JSON-Dateien:
         ├── Nein → Gruppe anlegen + IP-Discovery vorbereiten
         └── Ja  → keine Aktion nötig
 ```
+
 
 Des weiteren werden die Netzwerkinformationen in das Anmerkungsfeld der Gruppe Dokumentiert.
 
@@ -230,6 +237,8 @@ TAL-GROUP                                    ← Wurzel (von TAL Oil verwaltet)
     └── ...
 ```
 
+![McHammer Discovery](tal_prtg_struktur.png)
+
 ### Was bedeutet jede Ebene?
 
 **Ebene 0 — Land (Country)**
@@ -245,6 +254,8 @@ Das konkrete Netzwerksegment mit IP-Bereich, VLAN und Standortinformation. In de
 ```
 VLAN: 183 | 10.134.83.0/24 | München (D-MU-OF)
 ```
+
+![McHammer Discovery](tal_prtg_ANmerkung.png)
 
 **Ebene 3 — Gerätetyp (Type)**
 Beschreibt welche Art von Geräten in diesem Segment zu erwarten sind (z.B. `Tank Farm`, `Standard Server`). Auf dieser Ebene wird die automatische Geräteerkennung konfiguriert und ausgeführt.
@@ -288,6 +299,9 @@ Der zu scannende IP-Bereich ist direkt aus dem Netzwerkinventar abgeleitet. Für
 | Von | `1` | Startadresse des Scanbereichs |
 | Bis | `254` | Endadresse des Scanbereichs |
 
+![McHammer Discovery](tal_prtg_discovery.png)
+![McHammer Discovery](tal_prtg_discovery_2.png)
+
 ### Discovery-Status
 
 | Status | Beschreibung |
@@ -321,6 +335,9 @@ Beispiele:
 |---|---|
 | `TAL-Template-BasicDevice` | Allgemeine Grundüberwachung für Netzwerkgeräte |
 | *(weitere nach Bedarf)* | |
+
+
+![McHammer Discovery](tal_prtg_templates.png)
 
 ### Wer verwaltet die Vorlagen?
 
