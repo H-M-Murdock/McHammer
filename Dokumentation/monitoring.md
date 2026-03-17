@@ -160,7 +160,7 @@ Sobald TAL Oil die Liste aktualisiert und bereitstellt, muss der Synchronisation
 - **Geänderte Einträge** → werden beim nächsten Lauf berücksichtigt
 - **Entfernte Einträge** → bestehende PRTG-Gruppen werden als `ARCHIVED_DATA` markiert und **nicht gelöscht** (Sicherheitsnetz)
 
-Anhanf dieses TAGs können nicht mehr benötigte Gruppen einfach gelöscht werden. Dieser Vorgang ist nicht automatisiert und muss manuel angestoßen werden.
+Anhand dieses TAGs können nicht mehr benötigte Gruppen einfach gelöscht werden. Dieser Vorgang ist nicht automatisiert und muss manuel angestoßen werden.
 
 ---
 
