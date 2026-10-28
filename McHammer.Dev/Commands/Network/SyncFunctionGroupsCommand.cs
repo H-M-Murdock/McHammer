@@ -22,7 +22,7 @@ public class SyncFunctionGroupsCommand : BaseDevCommand
         // Verzeichnis abfragen
         var path = AnsiConsole.Ask<string>(
             "[grey]Pfad zum JSON-Verzeichnis:[/]",
-            @"D:\Prtg_FunctionGroups_USED");
+            @"M:\Prtg_FunctionGroups_USED");
 
         if (!Directory.Exists(path))
         {
@@ -125,7 +125,7 @@ public class SyncFunctionGroupsCommand : BaseDevCommand
                 finally
                 {
                     task.Value       = task.MaxValue;
-                    task.Description = "Synchronisierung abgeschlossen";
+                    task.Description = syncError is null ? "Synchronisierung abgeschlossen" : "Synchronisierung fehlgeschlagen";
                 }
             });
 

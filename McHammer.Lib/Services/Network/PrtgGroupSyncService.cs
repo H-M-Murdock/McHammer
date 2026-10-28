@@ -14,14 +14,23 @@ public class PrtgGroupSyncService : IPrtgGroupSyncService
     private readonly HttpClient _httpV1;   // Lesen  → ApiUrl  (v1 table.json)
     private readonly HttpClient _httpV2;   // Schreiben → ApiUrl2 (v2 REST)
 
+    private readonly int _creationLookupAttempts;
+    private readonly TimeSpan _creationLookupDelay;
+
     private const string TagLiveData     = "LIVE_DATA";
     private const string TagArchivedData = "ARCHIVED_DATA";
 
     public PrtgGroupSyncService(PrtgConfig config,
         HttpClient? httpV1 = null,
-        HttpClient? httpV2 = null)
+        HttpClient? httpV2 = null,
+        int creationLookupAttempts = 30,
+        TimeSpan? creationLookupDelay = null)
     {
         _config = config;
+        if (creationLookupAttempts <= 0) throw new ArgumentOutOfRangeException(nameof(creationLookupAttempts));
+        _creationLookupAttempts = creationLookupAttempts;
+        _creationLookupDelay = creationLookupDelay ?? TimeSpan.FromSeconds(2);
+        if (_creationLookupDelay < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(creationLookupDelay));
 
         var handler = new HttpClientHandler
         {
@@ -199,7 +208,7 @@ public class PrtgGroupSyncService : IPrtgGroupSyncService
     }
 
     /// <summary>V2 POST mit JSON-Body</summary>
-    private async Task<JsonDocument> PostV2Async(
+    private async Task<JsonDocument?> PostV2Async(
         string path, object body, CancellationToken ct)
     {
         var requestJson = JsonSerializer.Serialize(body, new JsonSerializerOptions
@@ -218,7 +227,20 @@ public class PrtgGroupSyncService : IPrtgGroupSyncService
                 requestJson,
                 responseBody);
 
-        return JsonDocument.Parse(responseBody);
+        // Some PRTG versions acknowledge creation without a JSON body.
+        // The caller resolves the created group by its exact parent/name in that case.
+        if (string.IsNullOrWhiteSpace(responseBody)) return null;
+        try
+        {
+            return JsonDocument.Parse(responseBody);
+        }
+        catch (JsonException)
+        {
+            throw new PrtgApiException(
+                "PRTG API v2 POST lieferte keine gültige JSON-Antwort. " +
+                "Die Gruppe wurde möglicherweise bereits angelegt; vor Wiederholung prüfen.",
+                (int)response.StatusCode, path, requestJson, responseBody);
+        }
     }
 
     private async Task PatchV2Async(string path, object body, CancellationToken ct)
@@ -242,6 +264,19 @@ public class PrtgGroupSyncService : IPrtgGroupSyncService
         }
     }
 
+    private static JsonDocument ParseGroupTable(string json, string url)
+    {
+        try
+        {
+            return JsonDocument.Parse(json);
+        }
+        catch (JsonException)
+        {
+            // Never include the query string: it contains API credentials.
+            throw new PrtgApiException(
+                $"PRTG API v1 lieferte {(string.IsNullOrWhiteSpace(json) ? "eine leere" : "keine gültige JSON-")} Antwort bei {url.Split('?')[0]}.");
+        }
+    }
     // ── PRTG Gruppen-Logik ─────────────────────────────────────────────────
 
     
@@ -252,12 +287,17 @@ public class PrtgGroupSyncService : IPrtgGroupSyncService
                   $"&filter_name={HttpUtility.UrlEncode(name)}&{_config.BuildAuthQuery()}";
 
         var json = await GetV1Async(url, ct);
-        var doc  = JsonDocument.Parse(json);
+        using var doc = ParseGroupTable(json, url);
         var arr  = doc.RootElement.GetProperty("groups");
 
-        if (arr.GetArrayLength() == 0) return null;
+        var matches = arr.EnumerateArray()
+            .Where(g => string.Equals(g.GetProperty("name").GetString(), name, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        if (matches.Length == 0) return null;
+        if (matches.Length > 1)
+            throw new PrtgApiException($"Gruppe '{name}' ist in der PRTG-Antwort nicht eindeutig ({matches.Length} Treffer).");
 
-        var g = arr[0];
+        var g = matches[0];
         return new PrtgGroup(
             g.GetProperty("objid").GetInt32(),
             g.GetProperty("name").GetString() ?? name,
@@ -271,7 +311,7 @@ public class PrtgGroupSyncService : IPrtgGroupSyncService
                   $"&id={parentId}&{_config.BuildAuthQuery()}";
 
         var json = await GetV1Async(url, ct);
-        var doc  = JsonDocument.Parse(json);
+        using var doc = ParseGroupTable(json, url);
 
         return doc.RootElement
             .GetProperty("groups")
@@ -287,16 +327,21 @@ public class PrtgGroupSyncService : IPrtgGroupSyncService
         string name, int parentId, CancellationToken ct)
     {
         var url = $"/api/table.json?content=groups&columns=objid,name,tags" +
-                  $"&id={parentId}&filter_name={HttpUtility.UrlEncode(name)}" +
+                  $"&id={parentId}&filter_parentid={parentId}&filter_name={HttpUtility.UrlEncode(name)}" +
                   $"&{_config.BuildAuthQuery()}";
 
         var json = await GetV1Async(url, ct);
-        var doc  = JsonDocument.Parse(json);
+        using var doc = ParseGroupTable(json, url);
         var arr  = doc.RootElement.GetProperty("groups");
 
-        if (arr.GetArrayLength() == 0) return null;
+        var matches = arr.EnumerateArray()
+            .Where(g => string.Equals(g.GetProperty("name").GetString(), name, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        if (matches.Length == 0) return null;
+        if (matches.Length > 1)
+            throw new PrtgApiException($"Gruppe '{name}' ist in der PRTG-Antwort nicht eindeutig ({matches.Length} Treffer).");
 
-        var g = arr[0];
+        var g = matches[0];
         return new PrtgGroup(
             g.GetProperty("objid").GetInt32(),
             g.GetProperty("name").GetString() ?? name,
@@ -350,17 +395,39 @@ public class PrtgGroupSyncService : IPrtgGroupSyncService
         var path = $"/api/v2/experimental/groups/{parentId}/group";
         var body = new { basic = new { name } };
 
-        var doc = await PostV2Async(path, body, ct);
+        using var doc = await PostV2Async(path, body, ct);
+        var newId = 0;
+        if (doc is not null && doc.RootElement.ValueKind == JsonValueKind.Object &&
+            doc.RootElement.TryGetProperty("id", out var idElement))
+        {
+            if (!int.TryParse(idElement.ToString(), out newId) || newId <= 0)
+                throw new PrtgApiException($"PRTG lieferte eine ungültige Gruppen-ID bei POST {path}.");
+        }
 
-        var idElement = doc.RootElement.GetProperty("id");
-        var newId = idElement.ValueKind == JsonValueKind.String
-            ? int.Parse(idElement.GetString()!)
-            : idElement.GetInt32();
-
-        var newName = doc.RootElement.TryGetProperty("name", out var n)
-            ? n.GetString() ?? name : name;
-
-        await Task.Delay(300, ct);
+        var newName = name;
+        if (newId == 0)
+        {
+            // POST must never be retried: the group may already have been created.
+            // Only repeat read requests while waiting for the v1 table to catch up.
+            for (var attempt = 0; attempt < _creationLookupAttempts; attempt++)
+            {
+                await Task.Delay(_creationLookupDelay, ct);
+                var created = await FindChildGroupAsync(name, parentId, ct);
+                if (created is null) continue;
+                newId = created.ObjId;
+                newName = created.Name;
+                break;
+            }
+            if (newId == 0)
+                throw new PrtgApiException(
+                    $"PRTG bestätigte POST {path} ohne Gruppen-ID. Gruppe '{name}' unter Eltern-ID {parentId} " +
+                    "ist nach bis zu {_creationLookupAttempts * _creationLookupDelay.TotalSeconds:0.#} Sekunden noch nicht eindeutig lesbar. " +
+                    "Möglicherweise bereits angelegt; vor Wiederholung in PRTG prüfen.");
+        }
+        else
+        {
+            await Task.Delay(300, ct);
+        }
 
         // Anmerkung über v1 setzen, falls vorhanden
         if (!string.IsNullOrWhiteSpace(description))
